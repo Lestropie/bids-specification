@@ -544,26 +544,26 @@ for more information.
 
 1.  Any metadata file (such as `.json`, `.bvec` or `.tsv`) MAY be defined at any directory level.
 
-1.  For a given data file, any metadata file is applicable to that data file if:
+2.  For a given data file, any metadata file is applicable to that data file if:
     1.  It is stored at the same directory level or higher;
-    1.  The metadata and the data filenames possess the same suffix;
-    1.  The metadata filename does not include any entity absent from the data filename.
+    2.  The metadata and the data filenames possess the same suffix;
+    3.  The metadata filename does not include any entity absent from the data filename.
 
-1.  A metadata file MUST NOT have a filename that would be otherwise applicable
+3.  A metadata file MUST NOT have a filename that would be otherwise applicable
     to some data file based on rules 2.2 and 2.3 but is made inapplicable based on its
     location in the directory structure as per rule 2.1.
 
-1.  There MUST NOT be multiple metadata files applicable to a data file at one level
+4.  There MUST NOT be multiple metadata files applicable to a data file at one level
     of the directory hierarchy.
 
-1.  If multiple metadata files are applicable to a given data file:
+5.  If multiple metadata files are applicable to a given data file:
 
     1.  For [tabular files](#tabular-files) and other simple metadata files
         (for instance, [`bvec` / `bval` files for diffusion MRI](#04-modality-specific-files/01-magnetic-resonance-imaging#required-gradient-orientation-information),
         only the file lowest in the filesystem hierarchy SHALL be treated as being
         associated with that data file.
 
-    1.  For [JSON files](#key-value-files-dictionaries):
+    2.  For [JSON files](#key-value-files-dictionaries):
 
         1.  Files are loaded from the top of the directory hierarchy downwards,
             such that values from the top level are inherited by all data files
@@ -571,7 +571,7 @@ for more information.
             by a value for the same key present in another metadata file at a lower level
             (though it is RECOMMENDED to minimise the extent of such overrides).
 
-        1.  There is no notion of "unsetting" a key/value pair.
+        2.  There is no notion of "unsetting" a key/value pair.
 
 Corollaries:
 
@@ -580,7 +580,7 @@ Corollaries:
     similarly, a metadata file that is applicable to multiple participants / sessions
     MUST NOT be placed within a directory corresponding to only one such participant / session.
 
-1.  It is permissible for a single metadata file to be applicable to multiple data
+2.  It is permissible for a single metadata file to be applicable to multiple data
     files at that level of the hierarchy or below. Where such metadata content is consistent
     across multiple data files, it is RECOMMENDED to store metadata in this
     way, rather than duplicating that metadata content across multiple metadata files.
