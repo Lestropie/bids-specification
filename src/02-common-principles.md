@@ -542,6 +542,8 @@ for more information.
 
 ## The Inheritance Principle
 
+<!--lint disable ordered-list-marker-value-->
+
 1.  Any metadata file (such as `.json`, `.bvec` or `.tsv`) MAY be defined at any directory level.
 
 2.  For a given data file, any metadata file is applicable to that data file if:
@@ -584,6 +586,8 @@ Corollaries:
     files at that level of the hierarchy or below. Where such metadata content is consistent
     across multiple data files, it is RECOMMENDED to store metadata in this
     way, rather than duplicating that metadata content across multiple metadata files.
+
+<!--lint enable ordered-list-marker-value-->
 
 Example 1: Demonstration of inheritance principle
 
