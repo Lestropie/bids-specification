@@ -26,32 +26,30 @@ as reference for both software implementations and advanced BIDS users.
 
 1.  If, for a given data file, multiple metadata files satisfy criteria 2.a-c above:
 
-    1.  The set of applicable metadata files is ordered as follows:
-
-        1.  Within each level of the filesystem hierarchy:
-
-            1.  Obtain the list of applicable metadata files within that directory.
-
-            1.  Sort this list in order of fewest to most entities.
-
-            1.  There MUST NOT be multiple applicable metadata files that
-                possess the same number of entities.
-
-            1.  The set of entities in any filename within this list MUST be a
-                strict superset of those present in the filename that precedes
-                it within this list.
-
-        1.  These lists are concatenated in order of highest to lowest level in the
-            filesystem hierarchy.
+    1.  The set of applicable metadata files is ordered as follows.
+        Within each level of the filesystem hierarchy independently,
+        applicable files are ordered from fewest to most entities.
+        These lists are concatenated in order of highest to lowest level in the
+        filesystem hierarchy.
 
     1.  For [tabular files](#tabular-files) and other simple metadata files
-        (for instance, [`bvec` / `bval` files for diffusion MRI](#bvec-bval),
-        accessing metadata associated with a data file MUST consider only the
-        last file in the order established by rule 4.a.
+        (for instance, [`bvec` / `bval` files for diffusion MRI](#bvec-bval):
 
-    1.  For [JSON files](#json-files), key-values MUST be loaded
-        from applicable files sequentially in the order established by rule 4.a,
-        overwriting any existing key-values when doing so.
+        1.  Accessing metadata associated with a data file MUST consider only the
+            last file in the order established by rule 4.a.
+
+        1.  There MUST NOT be any ambiguity in determining this file via the
+            sorting described in rule 4.a.
+
+    1.  For [JSON files](#json-files):
+
+        1.  Key-values MUST be loaded from applicable files sequentially in the
+            order established by rule 4.a,
+            overwriting any existing key-values when doing so.
+
+        1.  Where multiple metadata files appear in the same location in the list
+            sorted as per rule 4.a, a metadata key MUST NOT appear in more than
+            one such metadata file.
 
 ### Corollaries
 
@@ -74,21 +72,13 @@ as reference for both software implementations and advanced BIDS users.
         any values associated with that key earlier in the ordering are overridden
         (though it is RECOMMENDED to minimize the extent of such overrides).
 
-    1.  The requirement that applicable metadata files follow a strict ordering according to
-        addition of entities applies individually within each level of the filesystem hierarchy;
-        it is not necessary for the complete ordered set of all applicable metadata files
-        across all filesystem levels to demonstrate strict addition of entities between
-        sequential filenames.
-
     1.  A key-value being present in a metadata file earlier in the ordering but absent in
         any file later in the ordering does not imply the "unsetting" of that key-value.
 
     1.  Removal of key-values present in files earlier in the ordering based on the content
         of files later in the ordering is not possible.
 
-## Advanced examples
-
-### Example 1: Complex inheritance scenario
+## Complex inheritance scenario
 
 <!-- This block generates a file tree.
 A guide for using macros can be found at
@@ -121,11 +111,18 @@ A guide for using macros can be found at
     "sub-02": {
         "ses-01": {
             "func": {
-                "sub-02_ses-01_task-rest_bold.nii.gz": "",
+                "sub-02_ses-01_res-high_task-olr_bold.nii.gz": "",
+                "sub-02_ses-01_res-high_task-rest_bold.nii.gz": "",
+                "sub-02_ses-01_res-high_bold.json": "",
+                "sub-02_ses-01_res-low_task-olr_bold.nii.gz": "",
+                "sub-02_ses-01_res-low_task-rest_bold.nii.gz": "",
+                "sub-02_ses-01_res-low_bold.json": "",
+                "sub-02_ses-01_task-olr_bold.json": "",
                 "sub-02_ses-01_task-rest_bold.json": "",
                 }
             }
         },
+    "task-olr_bold.json": "",
     "task-ovg_bold.json": "",
     "task-rest_bold.json": "",
     }
@@ -144,6 +141,10 @@ applicable is as follows:
     -   `sub-01/ses-02/func/sub-01_ses-02_task-rest_bold.nii.gz`
     -   `sub-02/ses-01/func/sub-02_ses-01_task-rest_bold.nii.gz`
 
+-   `task-olr_bold.json`:
+    -   `sub-02/ses-01/func/sub-02_ses-01_res-high_task-olr_bold.nii.gz`
+    -   `sub-02/ses-01/func/sub-02_ses-01_res-low_task-olr_bold.nii.gz`
+
 -   `task-ovg_bold.json`:
     -   `sub-01/ses-01/func/sub-01_ses-01_task-ovg_run-1_bold.nii.gz`
     -   `sub-01/ses-01/func/sub-01_ses-01_task-ovg_run-2_bold.nii.gz`
@@ -152,7 +153,8 @@ applicable is as follows:
 -   `task-rest_bold.json`:
     -   `sub-01/ses-01/func/sub-01_ses-01_task-rest_bold.nii.gz`
     -   `sub-01/ses-02/func/sub-01_ses-02_task-rest_bold.nii.gz`
-    -   `sub-02/ses-01/func/sub-02_ses-01_task-rest_bold.nii.gz`
+    -   `sub-02/ses-01/func/sub-02_ses-01_res-high_task-rest_bold.nii.gz`
+    -   `sub-02/ses-01/func/sub-02_ses-01_res-low_task-rest_bold.nii.gz`
 
 -   `sub-01/sub-01_bold.json`:
     -   `sub-01/ses-01/func/sub-01_ses-01_task-ovg_run-1_bold.nii.gz`
@@ -176,8 +178,21 @@ applicable is as follows:
 -   `sub-01/ses-01/sub-01_ses-01_task-rest_bold.json`:
     -   `sub-01/ses-01/sub-01_ses-01_task-rest_bold.nii.gz`
 
+-   `sub-02/ses-01/sub-02_ses-01_res-high_bold.json`:
+    -   `sub-02/ses-01/sub-02_ses-01_res-high_task-olr_bold.nii.gz`
+    -   `sub-02/ses-01/sub-02_ses-01_res-high_task-rest_bold.nii.gz`
+
+-   `sub-02/ses-01/sub-02_ses-01_res-low_bold.json`:
+    -   `sub-02/ses-01/sub-02_ses-01_res-low_task-olr_bold.nii.gz`
+    -   `sub-02/ses-01/sub-02_ses-01_res-low_task-rest_bold.nii.gz`
+
+-   `sub-02/ses-01/sub-02_ses-01_task-olr_bold.json`:
+    -   `sub-02/ses-01/sub-02_ses-01_res-high_task-olr_bold.nii.gz`
+    -   `sub-02/ses-01/sub-02_ses-01_res-low_task-olr_bold.nii.gz`
+
 -   `sub-02/ses-01/sub-02_ses-01_task-rest_bold.json`:
-    -   `sub-02/ses-01/sub-02_ses-01_task-rest_bold.nii.gz`
+    -   `sub-02/ses-01/sub-02_ses-01_res-high_task-rest_bold.nii.gz`
+    -   `sub-02/ses-01/sub-02_ses-01_res-low_task-rest_bold.nii.gz`
 
 ### Applicable metadata files per data file
 
@@ -216,46 +231,77 @@ files would be loaded is as follows:
     -   `task-rest_bold.json`
     -   `sub-01/sub-01_bold.json`
 
--   `sub-02/ses-01/func/sub-02_ses-01_task-rest_bold.nii.gz`:
+-   `sub-02_ses-01_res-high_task-olr_bold.nii.gz`:
+    -   `bold.json`
+    -   `task-olr_bold.json`
+    -   `sub-02/ses-01/func/sub-02_ses-01_res-high_bold.json`
+        and `sub-02/ses-01/func/sub-02_ses-01_task-olr_bold.json` (ambiguous order)
+
+-   `sub-02_ses-01_res-high_task-rest_bold.nii.gz`:
     -   `bold.json`
     -   `task-rest_bold.json`
-    -   `sub-02/ses-01/func/sub-02_ses-01_task-rest_bold.json`
+    -   `sub-02/ses-01/func/sub-02_ses-01_res-high_bold.json`
+        and `sub-02/ses-01/func/sub-02_ses-01_task-rest_bold.json` (ambiguous order)
 
-### Example 2: Violation due to order ambiguity
+-   `sub-02_ses-01_res-low_task-olr_bold.nii.gz`:
+    -   `bold.json`
+    -   `task-olr_bold.json`
+    -   `sub-02/ses-01/func/sub-02_ses-01_res-low_bold.json`
+        and `sub-02/ses-01/func/sub-02_ses-01_task-olr_bold.json` (ambiguous order)
 
-<!-- This block generates a file tree.
-A guide for using macros can be found at
- https://github.com/bids-standard/bids-specification/blob/master/macros_doc.md
--->
+-   `sub-02_ses-01_res-low_task-rest_bold.nii.gz`:
+    -   `bold.json`
+    -   `task-rest_bold.json`
+    -   `sub-02/ses-01/func/sub-02_ses-01_res-low_bold.json`
+        and `sub-02/ses-01/func/sub-02_ses-01_task-rest_bold.json` (ambiguous order)
 
-{{ MACROS___make_filetree_example(
-    {
-    "sub-01": {
-        "func": {
-            "sub-01_acq-highres_bold.json": "",
-            "sub-01_acq-lowres_bold.json": "",
-            "sub-01_bold.json": "",
-            "sub-01_task-ovg_bold.json": "",
-            "sub-01_task-ovg_acq-highres_bold.nii.gz": "",
-            "sub-01_task-ovg_acq-lowres_bold.nii.gz": "",
-            "sub-01_task-rest_bold.json": "",
-            "sub-01_task-rest_acq-highres_bold.nii.gz": "",
-            "sub-01_task-rest_acq-lowres_bold.nii.gz": "",
-            }
-        }
-    }
-) }}
+### Principle violation due to key precedence ambiguity
 
-Data file `sub-01_ses-01_task-ovg_acq-highres_bold.nii.gz` has three metadata
-files deemed applicable according to rule 2, all residing within the same directory: (
-`sub-01_bold.json`,
-`sub-01_task-ovg_bold.json`,
-`sub-01_acq-highres_bold.json`).
-It is however impossible to determine a unique ordering of these files that
-satisfies rule 4.a. The metadata contents to be associated with this data file
-would be ambiguous if files `sub-01_task-ovg_bold.json` and `sub-01_acq-highres_bold.json`
-were to contain differing values for the same key, as the ambiguous order in which
-they were loaded would determine those contents.
+Consider the inheritance of file `sub-02_ses-01_res-high_task-olr_bold.nii.gz`,
+where the contents of the applicable metadata files are as follows:
+
+Contents of file `bold.json`:
+```
+{
+    "Key": "One"
+}
+```
+
+Contents of file `task-rest_bold.json`:
+```
+{
+    "Key": "Two"
+}
+```
+
+Contents of file `sub-02/ses-01/func/sub-02_ses-01_res-high_bold.json`:
+```
+{
+    "Key": "Three"
+}
+```
+
+Contents of file `sub-02/ses-01/func/sub-02_ses-01_task-olr_bold.json`:
+```
+{
+    "Key": "Four"
+}
+```
+
+In loading inherited metadata for this file as per rule 4.c.i.,
+the value associated with key "`Key`" would be initialised as "`One`" as
+loaded from file `bold.json`,
+then overridden to "`Two`" as loaded from file `task-rest_bold.json`.
+However it is not possible as per rule 4.a. to unambiguously sort applicable metadata
+files `sub-02/ses-01/func/sub-02_ses-01_res-high_bold.json` and
+`sub-02/ses-01/func/sub-02_ses-01_task-olr_bold.json`,
+as they reside at the same level of the filesystem hierarchy
+and possess the same number of entities.
+As these two files additionally possess values for the same metadata key "`Key`",
+it is therefore impossible to determine whether the final value of key "`Key`" ascribed
+to file `sub-02_ses-01_res-high_task-olr_bold.nii.gz` should be "`Three`" or "`Four`".
+It is specifically this conflict that results in Inheritance Principle violation
+as per rule 4.c.ii.
 
 <!-- Link Definitions -->
 
